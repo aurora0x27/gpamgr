@@ -1,7 +1,7 @@
 set_project("a1")
 set_languages("c++23")
 
-set_allowedplats("linux", "macosx")
+set_allowedplats("linux", "macosx", "windows")
 set_allowedmodes("debug", "release")
 
 add_rules("plugin.compile_commands.autoupdate", { outputdir = "build" })
@@ -9,8 +9,10 @@ add_rules("plugin.compile_commands.autoupdate", { outputdir = "build" })
 if is_mode("debug") then
 	set_symbols("debug")
 	set_optimize("none")
-	add_cxxflags("-fsanitize=address,undefined", { force = true })
-	add_ldflags("-fsanitize=address,undefined", { force = true })
+	if not is_plat("windows") then
+		add_cxxflags("-fsanitize=address,undefined", { force = true })
+		add_ldflags("-fsanitize=address,undefined", { force = true })
+	end
 end
 
 if is_mode("release") then

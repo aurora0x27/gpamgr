@@ -3,3 +3,4 @@ build/
 .xmake/
 *.gpa
 *.msql
+.gpamgr_history

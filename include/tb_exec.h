@@ -7,6 +7,7 @@
 #include <string>
 #include <expected>
 #include <string_view>
+#include <algorithm>
 
 namespace gpamgr {
 class PlanBuildContext;

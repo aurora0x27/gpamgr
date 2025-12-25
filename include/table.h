@@ -3,6 +3,7 @@
 #include "misc.h"
 #include "log.h"
 
+#include <span>
 #include <string>
 #include <sstream>
 #include <iomanip>
