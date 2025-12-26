@@ -396,6 +396,11 @@ class PlanBuilder : public ASTVisitor<PlanBuilder> {
         return utils::Diagnostic{src, msg, B, E, Level::Error};
     }
 
+    utils::Diagnostic emit_warn(std::string_view msg, size_t B, size_t E) {
+        using Level = utils::Diagnostic::Level;
+        return utils::Diagnostic{src, msg, B, E, Level::Warning};
+    }
+
 public:
     static PlanBuilder create(PlanBuildContext &ctx, const Stmt *root, std::string_view src) {
         return PlanBuilder{ctx, root, src};
@@ -480,8 +485,39 @@ public:
                     return false;
                 }
 
-                if (call->args.size() != 1 || !call->args[0]->isa(EK::IdentifierExprKind)) {
+                if (kind == Cnt) {
+                    // argument means nothing to count
+                    if (call->args.size() > 0) {
+                        auto [b, _] = call->args[0]->src_range();
+                        auto [_b, e] = call->args[call->args.size() - 1]->src_range();
+                        emit_warn("paramaters in count aggregation does not have any functionality",
+                                  b,
+                                  e)
+                            .display();
+                    }
+                    agg_items.emplace_back(kind, 0);
+                    continue;
+                }
+
+                if (call->args.empty()) {
                     auto [b, e] = expr->src_range();
+                    diags.emplace_back(emit_error("aggregation argument cannot be empty", b, e));
+                    return false;
+                }
+
+                if (call->args.size() > 1) {
+                    auto [b, _] = call->args[0]->src_range();
+                    auto [_b, e] = call->args[call->args.size() - 1]->src_range();
+                    diags.emplace_back(
+                        emit_error("only one aggregation argument is allowed for each function",
+                                   b,
+                                   e));
+                    return false;
+                }
+
+                if (!call->args[0]->isa(EK::IdentifierExprKind)) {
+                    auto [b, _] = call->args[0]->src_range();
+                    auto [_b, e] = call->args[call->args.size() - 1]->src_range();
                     diags.emplace_back(emit_error("aggregate argument must be a column", b, e));
                     return false;
                 }

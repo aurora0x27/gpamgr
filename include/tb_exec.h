@@ -503,6 +503,7 @@ public:
                 case Avg: return "Avg";
                 case Cnt: return "Cnt";
             }
+            std::abort();
         };
         std::cout << "AggregatePlan(";
         for (auto &it: items) {
